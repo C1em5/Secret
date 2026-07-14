@@ -435,6 +435,7 @@ function defaultState(){
     code1Verified:false, quiz1Passed:false, quiz1LastScore:null,
     code2Verified:false, unlockTimestamp:null, adminOverride:false,
     quiz2Passed:false, quiz2LastScore:null,
+    usedCode1:null,
     achievements:{ code1:false, quiz1:false, code2:false, quiz2:false }
   };
 }
@@ -509,8 +510,10 @@ function submitCode1(){
   const input = document.getElementById('input-code1');
   const errorEl = document.getElementById('error-code1');
   const validCodes = CONFIG.CODE1.map(normalize);
-  if(validCodes.includes(normalize(input.value))){
+  const typed = normalize(input.value);
+  if(validCodes.includes(typed)){
     state.code1Verified = true;
+    state.usedCode1 = typed;
     saveState(state);
     errorEl.textContent = '';
     unlockAndShow('code1', render);
@@ -525,7 +528,9 @@ function submitCode1(){
 function submitCode2(){
   const input = document.getElementById('input-code2');
   const errorEl = document.getElementById('error-code2');
-  if(normalize(input.value) === normalize(CONFIG.CODE2)){
+  const typed = normalize(input.value);
+  const validCodes = CONFIG.CODE1.map(normalize).filter(c => c !== state.usedCode1);
+  if(validCodes.includes(typed)){
     state.code2Verified = true;
     if(!state.unlockTimestamp){ state.unlockTimestamp = Date.now() + CONFIG.LOCK_DAYS*24*60*60*1000; }
     saveState(state);
