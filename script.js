@@ -8,7 +8,17 @@
   const overlayText = document.getElementById('overlayText');
   const retryBtn = document.getElementById('retryBtn');
   const stage = document.getElementById('stage');
+    let gameWon = false;
 
+  function markFishingWin(){
+    try{
+      const raw = localStorage.getItem('rtm_gift_state_v1');
+      const state = raw ? JSON.parse(raw) : {};
+      state.fishingPassed = true;
+      localStorage.setItem('rtm_gift_state_v1', JSON.stringify(state));
+    }catch(e){}
+    window.location.href = 'index.html';
+}
   const BAR_HEIGHT_PCT = 30;   // % of track height
   const FISH_HEIGHT_PCT = 17;  // % of track height (approx, square sprite)
   const RISE_SPEED = 95;       // %/sec while holding
@@ -48,17 +58,20 @@
     requestAnimationFrame(loop);
   }
 
-  function endGame(win){
+function endGame(win){
     running = false;
     overlay.classList.add('show');
+    gameWon = win;
     if(win){
       overlayTitle.textContent = 'Поймал! 🐟';
-      overlayText.textContent = 'Рыбка твоя!';
+      overlayText.textContent = 'Рыбка твоя! Возвращайся в квест.';
+      retryBtn.textContent = 'Вернуться к квесту';
     } else {
       overlayTitle.textContent = 'Сорвалась...';
       overlayText.textContent = 'Попробуй ещё раз!';
+      retryBtn.textContent = 'Ещё раз';
     }
-  }
+}
 
   function loop(ts){
     if(!running) return;
@@ -136,8 +149,12 @@
 
   retryBtn.addEventListener('click', function(e){
     e.stopPropagation();
-    resetGame();
-  });
+    if(gameWon){
+      markFishingWin();
+    } else {
+      resetGame();
+    }
+});
   retryBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
   retryBtn.addEventListener('touchstart', function(e){ e.stopPropagation(); }, {passive:true});
 
