@@ -437,6 +437,7 @@ function defaultState(){
     code2Verified:false, unlockTimestamp:null, adminOverride:false,
     quiz2Passed:false, quiz2LastScore:null,
     usedCode1:null,
+    fishingPassed:false,
     achievements:{ code1:false, quiz1:false, code2:false, quiz2:false }
   };
 }
@@ -488,7 +489,11 @@ function isUnlocked(){
   return Date.now() >= state.unlockTimestamp;
 }
 function render(){
-  renderConstellation();
+  renderConstellation(); // (или renderAchievementShelf — как у тебя называется, не трогай эту строку)
+  if(state.quiz1Passed && !state.fishingPassed){
+    window.location.href = 'game.html';
+    return;
+  }
   const idx = stageIndex();
   if(idx === 0){ showScreen('screen-code1'); }
   else if(idx === 1){ buildQuiz('quiz1', CONFIG.QUIZ1, 'quiz1-questions'); showScreen('screen-quiz1'); }
@@ -601,7 +606,7 @@ function submitQuiz(key){
   const passed = score >= CONFIG.PASS_THRESHOLD;
   if(key === 'quiz1'){
     state.quiz1LastScore = score;
-    if(passed){ state.quiz1Passed = true; saveState(state); unlockAndShow('quiz1', render); }
+    if(passed){ state.quiz1Passed = true; saveState(state); unlockAndShow('quiz1', goToFishing); }
     else {
       saveState(state);
       document.getElementById('quiz1-score-fail').textContent =
