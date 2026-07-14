@@ -34,7 +34,7 @@
     position:relative;
     height:100%;
     width: 100%;
-    background-image:url("images/background1.png");
+    background-image:url("background1.png");
     background-size:100% 100%;
     background-repeat:no-repeat;
     image-rendering: -webkit-optimize-contrast;
@@ -55,7 +55,7 @@
     height:30%;
     top:60%;
 
-    background-image:url("images/green1.png");
+    background-image:url("green1.png");
     background-size:100% 80%;
     background-repeat:no-repeat;
 
@@ -77,7 +77,7 @@
     aspect-ratio: 1/1;
     left: -35%;
     top:80%;
-    background-image:url("images/fish1.png");
+    background-image:url("fish1.png");
     background-size:contain;
     background-repeat:no-repeat;
     background-position:center;
