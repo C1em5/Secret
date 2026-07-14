@@ -355,7 +355,16 @@ button.text-link{
     </div>
   </div>
 
-  <div class="screen" id="screen-quiz2">
+<div class="screen" id="screen-quiz2">
+    <div class="card">
+      <div class="eyebrow">Глава V</div>
+      <h1>Финальное испытание</h1>
+      <p class="lead">Последний шаг перед финалом.</p>
+      <div id="quiz2-questions"></div>
+      <div class="hint-error" id="error-quiz2"></div>
+      <button id="quiz2-submit-btn" onclick="submitQuiz('quiz2')">Ответить</button>
+    </div>
+  </div>
 
   <div class="screen" id="screen-quiz2-fail">
     <div class="card">
@@ -468,7 +477,7 @@ function stageIndex(){
   if(!state.code2Verified) return 4;
   if(!state.quiz2Passed) return 5;
   return 6;
-}
+
 }
 function renderConstellation(){
   const total = 5;
