@@ -312,13 +312,8 @@ button.text-link{
       <div class="eyebrow">Глава III</div>
       <h1>Ты справилась ✨</h1>
       <div class="score-badge" id="quiz1-score-success"></div>
-      <p id="gift1-text">Первый подарок уже твой. Загляни в <a href="https://drive.google.com/file/d/1e2ZIeO3JO203kvXvqHRI49w-bcsxi8FL/view?usp=sharing">Cюда</a>.</p>
-      <div class="field">
-        <label for="input-code2">Хочешь узнать, что дальше? Введи второй код</label>
-        <input type="text" id="input-code2" autocomplete="off" placeholder="••••••">
-      </div>
-      <div class="hint-error" id="error-code2"></div>
-      <button onclick="submitCode2()">Продолжить</button>
+      <p id="gift1-text">Первый подарок уже твой. Загляни в <a href="...">Cюда</a>.</p>
+      <button onclick="continueToLock()">Продолжить</button>
     </div>
   </div>
 
@@ -344,18 +339,23 @@ button.text-link{
         </div>
       </div>
     </div>
+</div>
+
+  <div class="screen" id="screen-code2-entry">
+    <div class="card">
+      <div class="eyebrow">Глава V</div>
+      <h1>Время пришло</h1>
+      <p>Хочешь узнать, что дальше? Введи второй код</p>
+      <div class="field">
+        <label for="input-code2">КОД</label>
+        <input type="text" id="input-code2" autocomplete="off" placeholder="••••••">
+      </div>
+      <div class="hint-error" id="error-code2"></div>
+      <button onclick="submitCode2()">Продолжить</button>
+    </div>
   </div>
 
   <div class="screen" id="screen-quiz2">
-    <div class="card">
-      <div class="eyebrow">Глава V</div>
-      <h1>Финальное испытание</h1>
-      <p class="lead">Последний шаг перед финалом.</p>
-      <div id="quiz2-questions"></div>
-      <div class="hint-error" id="error-quiz2"></div>
-      <button id="quiz2-submit-btn" onclick="submitQuiz('quiz2')">Ответить</button>
-    </div>
-  </div>
 
   <div class="screen" id="screen-quiz2-fail">
     <div class="card">
@@ -438,6 +438,7 @@ function defaultState(){
     quiz2Passed:false, quiz2LastScore:null,
     usedCode1:null,
     fishingPassed:false,
+    gift1Seen:false,
     achievements:{ code1:false, quiz1:false, code2:false, quiz2:false }
   };
 }
@@ -454,7 +455,7 @@ let state = loadState();
 })();
 
 const SCREENS = ['screen-code1','screen-quiz1','screen-quiz1-fail','screen-quiz1-success',
-                  'screen-lock','screen-quiz2','screen-quiz2-fail','screen-final'];
+                  'screen-lock','screen-code2-entry','screen-quiz2','screen-quiz2-fail','screen-final'];
 function showScreen(id){
   SCREENS.forEach(s=>{ document.getElementById(s).classList.remove('active'); });
   document.getElementById(id).classList.add('active');
@@ -462,10 +463,12 @@ function showScreen(id){
 function stageIndex(){
   if(!state.code1Verified) return 0;
   if(!state.quiz1Passed) return 1;
-  if(!state.code2Verified) return 2;
+  if(!state.gift1Seen) return 2;
   if(!isUnlocked()) return 3;
-  if(!state.quiz2Passed) return 4;
-  return 5;
+  if(!state.code2Verified) return 4;
+  if(!state.quiz2Passed) return 5;
+  return 6;
+}
 }
 function renderConstellation(){
   const total = 5;
@@ -494,18 +497,31 @@ function render(){
     window.location.href = 'game.html';
     return;
   }
-  const idx = stageIndex();
-  if(idx === 0){ showScreen('screen-code1'); }
-  else if(idx === 1){ buildQuiz('quiz1', CONFIG.QUIZ1, 'quiz1-questions'); showScreen('screen-quiz1'); }
-  else if(idx === 2){
-    document.getElementById('quiz1-score-success').textContent = 'Результат: ' + Math.round(state.quiz1LastScore*100) + '%';
-    document.getElementById('gift1-text').textContent = CONFIG.GIFT1_TEXT;
+const idx = stageIndex();
+  if(idx === 0){
+    showScreen('screen-code1');
+  } else if(idx === 1){
+    buildQuiz('quiz1', CONFIG.QUIZ1, 'quiz1-questions');
+    showScreen('screen-quiz1');
+  } else if(idx === 2){
+    document.getElementById('quiz1-score-success').textContent =
+      'Результат: ' + Math.round(state.quiz1LastScore*100) + '%';
     showScreen('screen-quiz1-success');
-  } else if(idx === 3){ showScreen('screen-lock'); startTimerLoop(); }
-  else if(idx === 4){ buildQuiz('quiz2', CONFIG.QUIZ2, 'quiz2-questions'); showScreen('screen-quiz2'); }
-  else if(idx === 5){
-    document.getElementById('quiz2-score-final').textContent = 'Результат: ' + Math.round(state.quiz2LastScore*100) + '%';
-    document.getElementById('gift2-text').textContent = CONFIG.GIFT2_TEXT;
+  } else if(idx === 3){
+    if(!state.unlockTimestamp){
+      state.unlockTimestamp = Date.now() + CONFIG.LOCK_DAYS*24*60*60*1000;
+      saveState(state);
+    }
+    showScreen('screen-lock');
+    startTimerLoop();
+  } else if(idx === 4){
+    showScreen('screen-code2-entry');
+  } else if(idx === 5){
+    buildQuiz('quiz2', CONFIG.QUIZ2, 'quiz2-questions');
+    showScreen('screen-quiz2');
+  } else if(idx === 6){
+    document.getElementById('quiz2-score-final').textContent =
+      'Результат: ' + Math.round(state.quiz2LastScore*100) + '%';
     showScreen('screen-final');
   }
 }
@@ -538,7 +554,6 @@ function submitCode2(){
   const validCodes = CONFIG.CODE1.map(normalize).filter(c => c !== state.usedCode1);
   if(validCodes.includes(typed)){
     state.code2Verified = true;
-    if(!state.unlockTimestamp){ state.unlockTimestamp = Date.now() + CONFIG.LOCK_DAYS*24*60*60*1000; }
     saveState(state);
     errorEl.textContent = '';
     unlockAndShow('code2', render);
@@ -552,7 +567,11 @@ function submitCode2(){
 
 let quizProgress = { quiz1: 0, quiz2: 0 };
 let quizAnswers  = { quiz1: {}, quiz2: {} };
-
+function continueToLock(){
+  state.gift1Seen = true;
+  saveState(state);
+  render();
+}
 function buildQuiz(key, questions, containerId){
   const container = document.getElementById(containerId);
   container.innerHTML = '';
