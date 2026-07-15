@@ -157,6 +157,6 @@ function endGame(win){
 });
   retryBtn.addEventListener('pointerdown', function(e){ e.stopPropagation(); });
   retryBtn.addEventListener('touchstart', function(e){ e.stopPropagation(); }, {passive:true});
-
+  retryBtn.addEventListener('touchend', function(e){ e.stopPropagation(); }, {passive:true});
   resetGame();
 })();
